@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Controle de Tempo de Trabalho</title>
+  <style>
+    :root {
+      --bg: #f3f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --primary: #1e3a8a;
+      --primary-soft: #dbe7ff;
+      --border: #e2e8f0;
+      --ok: #16a34a;
+      --danger: #dc2626;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: "Inter", "Segoe UI", Roboto, Arial, sans-serif;
+      background: linear-gradient(160deg, #eef2ff 0%, var(--bg) 45%, #f8fafc 100%);
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .app {
+      width: min(920px, 100%);
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      padding: 24px;
+      display: grid;
+      gap: 20px;
+    }
+
+    .header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 6px;
+    }
+
+    .header p {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .form-card {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      background: #fcfdff;
+      display: grid;
+      gap: 12px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1.8fr 1fr 1fr 1fr auto;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 0.83rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    input {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 0.95rem;
+      color: var(--text);
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+      background: #fff;
+    }
+
+    input:focus {
+      border-color: #93c5fd;
+      box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.25);
+    }
+
+    .btn {
+      height: 42px;
+      border: none;
+      border-radius: 10px;
+      background: var(--primary);
+      color: #fff;
+      font-weight: 700;
+      padding: 0 14px;
+      cursor: pointer;
+      transition: transform .06s, opacity .2s;
+    }
+
+    .btn:hover {
+      opacity: .95;
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    .dashboard {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      display: grid;
+      gap: 14px;
+      background: #fff;
+    }
+
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .kpi {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      background: #fafcff;
+    }
+
+    .kpi .title {
+      color: var(--muted);
+      font-size: 0.8rem;
+      margin-bottom: 6px;
+    }
+
+    .kpi .value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .progress-area {
+      display: grid;
+      gap: 8px;
+    }
+
+    .progress-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 14px;
+      border-radius: 999px;
+      background: #e2e8f0;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #1d4ed8, #2563eb);
+      transition: width .3s ease;
+    }
+
+    .progress-fill.meta-atingida {
+      background: linear-gradient(90deg, #16a34a, #22c55e);
+    }
+
+    .status {
+      font-size: 0.9rem;
+      color: var(--muted);
+      min-height: 20px;
+    }
+
+    .status.ok {
+      color: var(--ok);
+      font-weight: 700;
+    }
+
+    .status.warn {
+      color: var(--danger);
+      font-weight: 700;
+    }
+
+    .tasks {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .tasks h2 {
+      font-size: 1rem;
+      color: var(--primary);
+    }
+
+    .list {
+      list-style: none;
+      display: grid;
+      gap: 8px;
+      max-height: 320px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .item {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 12px;
+      align-items: center;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fff;
+    }
+
+    .item .name {
+      font-weight: 600;
+      color: #1e293b;
+      overflow-wrap: anywhere;
+    }
+
+    .item .time {
+      font-family: "Consolas", "Courier New", monospace;
+      font-weight: 700;
+      color: var(--primary);
+      min-width: 92px;
+      text-align: right;
+    }
+
+    .remove-btn {
+      border: 1px solid #fecaca;
+      background: #fff5f5;
+      color: #b91c1c;
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 0.82rem;
+      cursor: pointer;
+    }
+
+    .empty {
+      color: var(--muted);
+      font-size: 0.92rem;
+      padding: 6px 2px;
+    }
+
+    @media (max-width: 860px) {
+      .row {
+        grid-template-columns: 1fr 1fr 1fr;
+      }
+
+      .field:first-child {
+        grid-column: 1 / -1;
+      }
+
+      .btn {
+        grid-column: 1 / -1;
+      }
+
+      .kpis {
+        grid-template-columns: 1fr;
+      }
+
+      .item {
+        grid-template-columns: 1fr auto;
+      }
+
+      .item .remove-btn {
+        grid-column: 1 / -1;
+        justify-self: end;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="header">
+      <h1>Controle de Tempo de Trabalho</h1>
+      <p>Meta diária fixa de <strong>6 horas</strong> para acompanhar o progresso do dia.</p>
+    </header>
+
+    <section class="form-card" aria-label="Formulário de tarefa">
+      <div class="row">
+        <div class="field">
+          <label for="taskName">Nome da tarefa</label>
+          <input id="taskName" type="text" placeholder="Ex: Alteração logo site" maxlength="120" />
+        </div>
+        <div class="field">
+          <label for="hours">Horas</label>
+          <input id="hours" type="number" min="0" max="23" step="1" value="0" />
+        </div>
+        <div class="field">
+          <label for="minutes">Minutos</label>
+          <input id="minutes" type="number" min="0" max="59" step="1" value="0" />
+        </div>
+        <div class="field">
+          <label for="seconds">Segundos</label>
+          <input id="seconds" type="number" min="0" max="59" step="1" value="0" />
+        </div>
+        <button class="btn" id="addTaskBtn" type="button">Adicionar</button>
+      </div>
+    </section>
+
+    <section class="dashboard" aria-label="Painel de progresso">
+      <div class="kpis">
+        <article class="kpi">
+          <div class="title">Meta Fixa</div>
+          <div class="value" id="goalValue">06:00:00</div>
+        </article>
+        <article class="kpi">
+          <div class="title">Tempo Total Acumulado</div>
+          <div class="value" id="totalValue">00:00:00</div>
+        </article>
+        <article class="kpi">
+          <div class="title">Tempo Restante</div>
+          <div class="value" id="remainingValue">06:00:00</div>
+        </article>
+      </div>
+
+      <div class="progress-area">
+        <div class="progress-head">
+          <span>Progresso do dia</span>
+          <strong id="progressPercent">0%</strong>
+        </div>
+        <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <p class="status" id="statusText">Comece adicionando uma tarefa para acompanhar o dia.</p>
+      </div>
+    </section>
+
+    <section class="tasks" aria-label="Lista de tarefas">
+      <h2>Tarefas adicionadas</h2>
+      <ul class="list" id="taskList"></ul>
+      <p class="empty" id="emptyListMessage">Nenhuma tarefa adicionada ainda.</p>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      const GOAL_SECONDS = 6 * 60 * 60;
+      const STORAGE_KEY = "controle_tempo_tarefas_v1";
+
+      const taskNameInput = document.getElementById("taskName");
+      const hoursInput = document.getElementById("hours");
+      const minutesInput = document.getElementById("minutes");
+      const secondsInput = document.getElementById("seconds");
+      const addTaskBtn = document.getElementById("addTaskBtn");
+      const taskList = document.getElementById("taskList");
+      const emptyListMessage = document.getElementById("emptyListMessage");
+      const totalValue = document.getElementById("totalValue");
+      const remainingValue = document.getElementById("remainingValue");
+      const progressFill = document.getElementById("progressFill");
+      const progressPercent = document.getElementById("progressPercent");
+      const statusText = document.getElementById("statusText");
+      const progressTrack = document.querySelector(".progress-track");
+
+      let tasks = loadTasks();
+
+      function formatTime(totalSeconds) {
+        const safe = Math.max(0, Math.floor(totalSeconds));
+        const hh = String(Math.floor(safe / 3600)).padStart(2, "0");
+        const mm = String(Math.floor((safe % 3600) / 60)).padStart(2, "0");
+        const ss = String(safe % 60).padStart(2, "0");
+        return hh + ":" + mm + ":" + ss;
+      }
+
+      function parsePositiveInt(value) {
+        const n = Number(value);
+        if (!Number.isFinite(n) || n < 0) return 0;
+        return Math.floor(n);
+      }
+
+      function clamp(value, min, max) {
+        return Math.min(max, Math.max(min, value));
+      }
+
+      function saveTasks() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+      }
+
+      function loadTasks() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return [];
+          const parsed = JSON.parse(raw);
+          if (!Array.isArray(parsed)) return [];
+          return parsed
+            .filter((t) => t && typeof t.name === "string" && Number.isFinite(t.seconds))
+            .map((t) => ({
+              id: String(t.id || crypto.randomUUID()),
+              name: t.name.trim().slice(0, 120) || "Tarefa sem nome",
+              seconds: Math.max(0, Math.floor(t.seconds))
+            }));
+        } catch (e) {
+          return [];
+        }
+      }
+
+      function getTotalSeconds() {
+        return tasks.reduce((acc, task) => acc + task.seconds, 0);
+      }
+
+      function updateDashboard() {
+        const total = getTotalSeconds();
+        const remaining = Math.max(0, GOAL_SECONDS - total);
+        const percentRaw = (total / GOAL_SECONDS) * 100;
+        const percent = Math.min(100, Math.max(0, percentRaw));
+
+        totalValue.textContent = formatTime(total);
+        remainingValue.textContent = formatTime(remaining);
+        progressFill.style.width = percent.toFixed(2) + "%";
+        progressPercent.textContent = percent.toFixed(1) + "%";
+        progressTrack.setAttribute("aria-valuenow", String(Math.round(percent)));
+
+        const goalReached = total >= GOAL_SECONDS;
+        progressFill.classList.toggle("meta-atingida", goalReached);
+        statusText.classList.remove("ok", "warn");
+
+        if (goalReached) {
+          const excedente = total - GOAL_SECONDS;
+          statusText.textContent = excedente > 0
+            ? "Meta atingida! Você está " + formatTime(excedente) + " acima da meta."
+            : "Meta de 6h atingida com sucesso!";
+          statusText.classList.add("ok");
+        } else if (total > 0) {
+          statusText.textContent = "Faltam " + formatTime(remaining) + " para completar as 6 horas.";
+        } else {
+          statusText.textContent = "Comece adicionando uma tarefa para acompanhar o dia.";
+          statusText.classList.add("warn");
+        }
+      }
+
+      function renderTasks() {
+        taskList.innerHTML = "";
+
+        if (!tasks.length) {
+          emptyListMessage.style.display = "block";
+          updateDashboard();
+          return;
+        }
+
+        emptyListMessage.style.display = "none";
+
+        tasks.forEach((task) => {
+          const li = document.createElement("li");
+          li.className = "item";
+
+          const name = document.createElement("span");
+          name.className = "name";
+          name.textContent = task.name;
+
+          const time = document.createElement("span");
+          time.className = "time";
+          time.textContent = formatTime(task.seconds);
+
+          const removeButton = document.createElement("button");
+          removeButton.className = "remove-btn";
+          removeButton.type = "button";
+          removeButton.textContent = "Remover";
+          removeButton.setAttribute("aria-label", "Remover tarefa " + task.name);
+          removeButton.addEventListener("click", function () {
+            tasks = tasks.filter((t) => t.id !== task.id);
+            saveTasks();
+            renderTasks();
+          });
+
+          li.appendChild(name);
+          li.appendChild(time);
+          li.appendChild(removeButton);
+          taskList.appendChild(li);
+        });
+
+        updateDashboard();
+      }
+
+      function resetForm() {
+        taskNameInput.value = "";
+        hoursInput.value = "0";
+        minutesInput.value = "0";
+        secondsInput.value = "0";
+        taskNameInput.focus();
+      }
+
+      function addTask() {
+        const name = taskNameInput.value.trim();
+        const hours = clamp(parsePositiveInt(hoursInput.value), 0, 23);
+        const minutes = clamp(parsePositiveInt(minutesInput.value), 0, 59);
+        const seconds = clamp(parsePositiveInt(secondsInput.value), 0, 59);
+        const totalSeconds = (hours * 3600) + (minutes * 60) + seconds;
+
+        if (!name) {
+          alert("Informe o nome da tarefa.");
+          taskNameInput.focus();
+          return;
+        }
+
+        if (totalSeconds <= 0) {
+          alert("Informe um tempo maior que zero.");
+          return;
+        }
+
+        tasks.unshift({
+          id: crypto.randomUUID(),
+          name: name,
+          seconds: totalSeconds
+        });
+
+        saveTasks();
+        renderTasks();
+        resetForm();
+      }
+
+      addTaskBtn.addEventListener("click", addTask);
+      taskNameInput.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") addTask();
+      });
+
+      [hoursInput, minutesInput, secondsInput].forEach((input) => {
+        input.addEventListener("blur", function () {
+          const min = Number(input.min || 0);
+          const max = Number(input.max || 9999);
+          input.value = String(clamp(parsePositiveInt(input.value), min, max));
+        });
+      });
+
+      renderTasks();
+    })();
+  </script>
+</body>
+</html>
