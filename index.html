@@ -217,6 +217,29 @@
       color: var(--primary);
     }
 
+    .tasks-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .clear-all-btn {
+      border: 1px solid #fecaca;
+      background: #fff5f5;
+      color: #b91c1c;
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .clear-all-btn:hover {
+      background: #fee2e2;
+    }
+
     .list {
       list-style: none;
       display: grid;
@@ -353,7 +376,10 @@
     </section>
 
     <section class="tasks" aria-label="Lista de tarefas">
-      <h2>Tarefas adicionadas</h2>
+      <div class="tasks-head">
+        <h2>Tarefas adicionadas</h2>
+        <button class="clear-all-btn" id="clearAllBtn" type="button">Excluir tudo</button>
+      </div>
       <ul class="list" id="taskList"></ul>
       <p class="empty" id="emptyListMessage">Nenhuma tarefa adicionada ainda.</p>
     </section>
@@ -369,6 +395,7 @@
       const minutesInput = document.getElementById("minutes");
       const secondsInput = document.getElementById("seconds");
       const addTaskBtn = document.getElementById("addTaskBtn");
+      const clearAllBtn = document.getElementById("clearAllBtn");
       const taskList = document.getElementById("taskList");
       const emptyListMessage = document.getElementById("emptyListMessage");
       const totalValue = document.getElementById("totalValue");
@@ -459,11 +486,13 @@
 
         if (!tasks.length) {
           emptyListMessage.style.display = "block";
+          clearAllBtn.style.display = "none";
           updateDashboard();
           return;
         }
 
         emptyListMessage.style.display = "none";
+        clearAllBtn.style.display = "inline-flex";
 
         tasks.forEach((task) => {
           const li = document.createElement("li");
@@ -535,6 +564,17 @@
       }
 
       addTaskBtn.addEventListener("click", addTask);
+      clearAllBtn.addEventListener("click", function () {
+        if (!tasks.length) return;
+
+        const canClear = confirm("Deseja apagar todas as tarefas de uma vez?");
+        if (!canClear) return;
+
+        tasks = [];
+        saveTasks();
+        renderTasks();
+      });
+
       taskNameInput.addEventListener("keydown", function (event) {
         if (event.key === "Enter") addTask();
       });
